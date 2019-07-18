@@ -540,6 +540,8 @@ class VoyagerBaseController extends Controller
 
     public function excel(Request $request)
     {
+        $search = (object) ['value' => $request->get('s'), 'key' => $request->get('key'), 'filter' => $request->get('filter')];
+
         $slug = $this->getSlug($request);
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
 
@@ -547,7 +549,7 @@ class VoyagerBaseController extends Controller
         $this->authorize('read', app($dataType->model_name));
 
         if (strlen($dataType->model_name) != 0) {
-            return (new SpoutTableExport($slug))
+            return (new SpoutTableExport($slug, $search))
                 ->download($dataType->display_name_singular . ' ' . date('Y-m-d His') . '.xlsx');
         }
 

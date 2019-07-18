@@ -10,9 +10,10 @@ use Box\Spout\Writer\Style\StyleBuilder;
 
 class SpoutTableExport
 {
-    public function __construct(string $slug)
+    public function __construct(string $slug, object $search)
     {
         $this->slug = $slug;
+        $this->search = $search;
         $this->dataType = DataType::where('slug', '=', $slug)->first();
 
         if (strlen($this->dataType->model_name) != 0) {
@@ -71,11 +72,19 @@ class SpoutTableExport
 
     public function query()
     {
+        $search = $this->search;
+
         $model = app($this->dataType->model_name);
         $sel = $this->dataRow->values()->all();
 
         // must have PK column
         $query = $model::select($sel);
+
+        if ($search->value && $search->key && $search->filter) {
+            $search_filter = ($search->filter == 'equals') ? '=' : 'LIKE';
+            $search_value = ($search->filter == 'equals') ? $search->value : '%'.$search->value.'%';
+            $query->where($search->key, $search_filter, $search_value);
+        }
 
         return $query;
     }
