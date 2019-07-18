@@ -540,7 +540,7 @@ class VoyagerBaseController extends Controller
 
     public function excel(Request $request)
     {
-        $search = (object) ['value' => $request->get('s'), 'key' => $request->get('key'), 'filter' => $request->get('filter')];
+        $search = $request->get('search');
 
         $slug = $this->getSlug($request);
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();

@@ -8,7 +8,7 @@
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->display_name_plural }} <small>Diperbarui pada {{ $position_data }}</small>
         </h1>
         @can('read', app($dataType->model_name))
-            <a href="{{ route('voyager.'.$dataType->slug.'.excel') }}" class="btn btn-info btn-add-new">
+            <a href="{{ route('voyager.'.$dataType->slug.'.excel', ['search' => $search]) }}" class="btn btn-info btn-add-new">
                 <i class="glyphicon glyphicon-download-alt"></i><span> Unduh Spreadsheet</span>
             </a>
         @endcan
