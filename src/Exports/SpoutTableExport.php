@@ -35,7 +35,7 @@ class SpoutTableExport
     public function download(string $fileName = null)
     {
         $writer = WriterFactory::create(Type::XLSX);
-        $datas = $this->query();
+        $datas_chunk = $this->query();
 
         $writer->openToBrowser($fileName);
 
@@ -55,9 +55,12 @@ class SpoutTableExport
 
         $writer->addRowWithStyle($this->headings(), $headerStyle);
 
-        foreach ($datas as $idx => $data) {
-            $writer->addRowWithStyle($data->toArray(), $rowStyle);
-        }
+        $datas_chunk->chunk(10000, function ($datas) use ($writer, $rowStyle) {
+            foreach ($datas as $idx => $data) {
+                $writer->addRowWithStyle($data->toArray(), $rowStyle);
+            }
+        });
+
         $writer->close();
     }
 
@@ -71,7 +74,8 @@ class SpoutTableExport
         $model = app($this->dataType->model_name);
         $sel = $this->dataRow->values()->all();
 
-        $query = $model::select($sel)->get();
+        // must have PK column
+        $query = $model::select($sel);
 
         return $query;
     }
