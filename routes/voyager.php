@@ -48,7 +48,7 @@ Route::group(['as' => 'voyager.'], function () {
                 $breadController = $dataType->controller
                                  ? $dataType->controller
                                  : $namespacePrefix.'VoyagerBaseController';
-                Route::get($dataType->slug.'/excel/{s}/{key}/{filter}', $breadController.'@excel')->name($dataType->slug.'.excel');
+                Route::get($dataType->slug.'/excel', $breadController.'@excel')->name($dataType->slug.'.excel');
                 Route::get($dataType->slug.'/order', $breadController.'@order')->name($dataType->slug.'.order');
                 Route::post($dataType->slug.'/order', $breadController.'@update_order')->name($dataType->slug.'.order');
                 Route::resource($dataType->slug, $breadController);
