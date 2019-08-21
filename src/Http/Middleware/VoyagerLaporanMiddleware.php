@@ -21,7 +21,7 @@ class VoyagerLaporanMiddleware
     {
         
         $route_name = Route::currentRouteName();
-        dump($route_name);
+        
         if (!Auth::guest()) {
             $user = auth()->user();
             if (isset($user->locale)) {
