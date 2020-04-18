@@ -4,6 +4,7 @@ namespace TCG\Voyager\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use TCG\Voyager\Facades\Voyager;
 
 class VoyagerLaporanMiddleware
@@ -18,13 +19,21 @@ class VoyagerLaporanMiddleware
      */
     public function handle($request, Closure $next)
     {
+        
+        $route_name = Route::currentRouteName();
+        
         if (!Auth::guest()) {
             $user = auth()->user();
             if (isset($user->locale)) {
                 app()->setLocale($user->locale);
             }
 
-            return $user->hasPermission('browse_laporan') ? $next($request) : abort(403);
+            if($user->hasPermission('browse_laporan') && $user->hasPermission($route_name))
+            {
+                return $next($request);
+            }else{
+                return abort(403);
+            }
         }
 
         abort(403);

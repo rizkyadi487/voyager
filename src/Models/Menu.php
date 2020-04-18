@@ -3,6 +3,7 @@
 namespace TCG\Voyager\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use TCG\Voyager\Events\MenuDisplay;
 use TCG\Voyager\Facades\Voyager;
@@ -144,17 +145,28 @@ class Menu extends Model
         });
 
         // Filter items by permission
-        $items = $items->filter(function ($item) {
-            return !$item->children->isEmpty() || \Auth::user()->can('browse', $item);
-        })->filter(function ($item) {
-            // Filter out empty menu-items
-            if ($item->url == '' && $item->route == '' && $item->children->count() == 0) {
-                return false;
-            }
+        if (Auth::user()->hasRole('admin')) {
+            $items = $items->filter(function ($item) {
+                // Filter out empty menu-items
+                if ($item->url == '' && $item->route == '' && $item->children->count() == 0) {
+                    return false;
+                }
+                return true;
+            });
 
-            return true;
-        });
-
+        } else {
+            $items = $items->filter(function ($item) {
+                return !$item->children->isEmpty()
+                    || ( Auth::user()->can('browse', $item)
+                        && Auth::user()->hasPermission($item->route));
+            })->filter(function ($item) {
+                // Filter out empty menu-items
+                if ($item->url == '' && $item->route == '' && $item->children->count() == 0) {
+                    return false;
+                }
+                return true;
+            });
+        }
         return $items->values();
     }
 }
