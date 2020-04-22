@@ -2,6 +2,7 @@
 
 namespace TCG\Voyager\Http\Middleware;
 
+use App\Repositories\AuditRepository as Audit;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -19,9 +20,10 @@ class VoyagerLaporanMiddleware
      */
     public function handle($request, Closure $next)
     {
-        
+
         $route_name = Route::currentRouteName();
-        
+        Audit::log(\Auth::user()->id, $route_name, 'Akses', $request->all());
+
         if (!Auth::guest()) {
             $user = auth()->user();
             if (isset($user->locale)) {
