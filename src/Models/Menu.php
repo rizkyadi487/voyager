@@ -44,21 +44,21 @@ class Menu extends Model
     /**
      * Display menu.
      *
-     * @param string      $menuName
+     * @param string $menuName
      * @param string|null $type
-     * @param array       $options
+     * @param array $options
      *
      * @return string
      */
     public static function display($menuName, $type = null, array $options = [])
     {
         // GET THE MENU - sort collection in blade
-        $menu = \Cache::remember('voyager_menu_'.$menuName, \Carbon\Carbon::now()->addDays(30), function () use ($menuName) {
+        $menu = \Cache::remember('voyager_menu_' . $menuName, \Carbon\Carbon::now()->addDays(30), function () use ($menuName) {
             return static::where('name', '=', $menuName)
-            ->with(['parent_items.children' => function ($q) {
-                $q->orderBy('order');
-            }])
-            ->first();
+                ->with(['parent_items.children' => function ($q) {
+                    $q->orderBy('order');
+                }])
+                ->first();
         });
 
         // Check for Menu Existence
@@ -69,7 +69,7 @@ class Menu extends Model
         event(new MenuDisplay($menu));
 
         // Convert options array into object
-        $options = (object) $options;
+        $options = (object)$options;
 
         $items = $menu->parent_items->sortBy('order');
 
@@ -78,7 +78,7 @@ class Menu extends Model
         }
 
         if ($type == 'admin') {
-            $type = 'voyager::menu.'.$type;
+            $type = 'voyager::menu.' . $type;
         } else {
             if (is_null($type)) {
                 $type = 'voyager::menu.default';
@@ -102,7 +102,7 @@ class Menu extends Model
 
     public function removeMenuFromCache()
     {
-        \Cache::forget('voyager_menu_'.$this->name);
+        \Cache::forget('voyager_menu_' . $this->name);
     }
 
     private static function processItems($items)
@@ -137,8 +137,14 @@ class Menu extends Model
                 }
             }
 
-            if( strpos( $item->href, config('app.endpoin_url')) !== true) {
+            if (strpos($item->href, config('app.endpoin_url')) !== true) {
                 $item->href = config('app.endpoin_url') . $item->href;
+            }
+
+            if (Auth::user()->hasPermission($item->route) || Auth::user()->hasRole('admin')) {
+                $item->allow = true;
+            } else {
+                $item->allow = false;
             }
 
             return $item;
@@ -157,7 +163,7 @@ class Menu extends Model
         } else {
             $items = $items->filter(function ($item) {
                 return !$item->children->isEmpty()
-                    || ( Auth::user()->can('browse', $item)
+                    || (Auth::user()->can('browse', $item)
                         && Auth::user()->hasPermission($item->route));
             })->filter(function ($item) {
                 // Filter out empty menu-items
@@ -167,6 +173,10 @@ class Menu extends Model
                 return true;
             });
         }
+
+        if (Auth::user()->hasRole('op_kota'))
+            \Log::info($items->values());
+
         return $items->values();
     }
 }
