@@ -174,9 +174,6 @@ class Menu extends Model
             });
         }
 
-        if (Auth::user()->hasRole('op_kota'))
-            \Log::info($items->values());
-
         return $items->values();
     }
 }
