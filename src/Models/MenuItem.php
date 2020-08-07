@@ -1,12 +1,14 @@
 <?php
 namespace TCG\Voyager\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Route;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Traits\Translatable;
 class MenuItem extends Model
 {
     use Translatable;
+    use SoftDeletes;
     protected $translatorMethods = [
         'link' => 'translatorLink',
     ];
