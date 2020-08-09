@@ -141,7 +141,7 @@ class Menu extends Model
                 $item->href = config('app.endpoin_url') . $item->href;
             }
 
-            if (Auth::user()->hasPermission($item->route) || Auth::user()->hasRole('admin')) {
+            if (Auth::user()->can('browse', $item)  || Auth::user()->hasPermission($item->route) || Auth::user()->hasRole('admin')) {
                 $item->allow = true;
             } else {
                 $item->allow = false;
