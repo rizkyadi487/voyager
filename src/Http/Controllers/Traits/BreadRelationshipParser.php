@@ -103,7 +103,7 @@ trait BreadRelationshipParser
      *
      * @return Model $item
      */
-    protected function relationToLink(Model $item, DataType $dataType)
+    protected function relationToLink($item, DataType $dataType)
     {
         $relations = $item->getRelations();
 
