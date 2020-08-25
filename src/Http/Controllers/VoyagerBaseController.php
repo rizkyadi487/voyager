@@ -16,6 +16,7 @@ use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 use TCG\Voyager\Models\DataType;
 use App\Repositories\AuditRepository as Audit;
+use TCG\Voyager\Exports\SpoutTableExportCH;
 
 class VoyagerBaseController extends Controller
 {
@@ -552,6 +553,12 @@ class VoyagerBaseController extends Controller
         // Check permission
         $this->authorize('read', app($dataType->model_name));
 
+        if (strpos($slug, 'ch_') !== false) {
+            if (strlen($dataType->model_name) != 0) {
+            return (new SpoutTableExportCH($slug, $search))
+                ->download($dataType->display_name_singular . ' ' . date('Y-m-d His') . '.xlsx');
+            }
+        }
         if (strlen($dataType->model_name) != 0) {
             return (new SpoutTableExport($slug, $search))
                 ->download($dataType->display_name_singular . ' ' . date('Y-m-d His') . '.xlsx');
