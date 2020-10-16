@@ -10,6 +10,6 @@
             {{--- {{ $version }}--}}
         {{--@endif--}}
 
-       <a href="{{ config('app.url') }}" target="_blank">Team {{ config('app.name') }} 2019</a>
+       <a href="{{ config('app.url') }}" target="_blank">Tim {{ config('app.name') }} 2019</a>
     </div>
 </footer>
