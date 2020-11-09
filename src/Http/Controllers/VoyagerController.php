@@ -4,6 +4,7 @@ namespace TCG\Voyager\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Constraint;
 use Intervention\Image\Facades\Image;
@@ -16,11 +17,16 @@ class VoyagerController extends Controller
         return Voyager::view('voyager::index');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         if (config('cas.enable') == false) {
-            Auth::logout();
-            return redirect()->route('voyager.login');
+            if ( DB::table('user_oauth')->where('user_id', '=', Auth::id())->count() >= 1) {
+                Auth::logout();
+                return redirect()->away('https://oauth.simpkb.id/logout');
+            } else {
+                Auth::logout();
+                return redirect()->route('voyager.login');
+            }
         } else {
             if( cas()->isAuthenticated() ) {
                 foreach (config('auth.guards') as $guard => $val) {
