@@ -5,6 +5,7 @@ namespace TCG\Voyager\Http\Middleware;
 use App\Models\UserRole;
 use App\Models\UserScope;
 use App\User;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Subfission\Cas\Facades\Cas;
@@ -95,6 +96,11 @@ class VoyagerCasMiddleware
 
                 \Auth::login($cas_user);
             } else {
+                User::where('email', $userpaspor->email)
+                    ->update([
+                        'paspor_id' => $userpaspor->userid,
+                        'last_login' => Carbon::now(),
+                    ]);
                 Auth::login($user, false);
             }
         }
