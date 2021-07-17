@@ -37,7 +37,7 @@ class VoyagerCasMiddleware
             $userpaspor = \DB::connection('ssodb-simpkb')->table('users')
                 ->where('userid', '=', $id_paspor)->first();
 
-            $user = User::where('username', $id_paspor)->first();
+            $user = User::where('email', $userpaspor->email)->first();
             if (!$user) {
                 $cas_user = User::updateOrCreate([
                     'email' => $userpaspor->email,
