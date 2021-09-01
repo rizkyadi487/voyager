@@ -101,6 +101,44 @@ class VoyagerCasMiddleware
                         'paspor_id' => $userpaspor->userid,
                         'last_login' => Carbon::now(),
                     ]);
+
+                \Artisan::call('map:user_scopes', ['--email' => $userpaspor->email, '--connection' => 'gpodb']);
+                \Artisan::call('map:user_scopes', ['--email' => $userpaspor->email, '--connection' => 'guruberbagidb']);
+                $id_user = User::where('email', $userpaspor->email)->first()->id;
+                $user_scopes = UserScope::where('email', '=', $userpaspor->email)
+                    ->select('k_group')
+                    ->get();
+
+                if (count($user_scopes) == 0) {
+                    abort(401, 'Mohon maaf anda tidak memiliki hak akses');
+                }
+
+                $is_pusat = false;
+
+                foreach ($user_scopes as $user_scope) {
+                    UserRole::updateOrCreate([
+                        'user_id' => $id_user,
+                        'role_id' => $user_scope->k_group,
+                    ], [
+                        'user_id' => $id_user,
+                        'role_id' => $user_scope->k_group,
+                    ]);
+
+                    if (in_array((int)$user_scope->k_group, [5, 22, 27, 28, 37, 42])) {
+                        $is_pusat = true;
+                    }
+                }
+
+                if ($is_pusat == true) {
+                    UserRole::updateOrCreate([
+                        'user_id' => $id_user,
+                        'role_id' => 99,
+                    ], [
+                        'user_id' => $id_user,
+                        'role_id' => 99,
+                    ]);
+                }
+
                 Auth::login($user, false);
             }
         }
