@@ -109,34 +109,38 @@ class VoyagerCasMiddleware
                     ->select('k_group')
                     ->get();
 
-                if (count($user_scopes) == 0) {
-                    abort(401, 'Mohon maaf anda tidak memiliki hak akses');
-                }
+                $user = User::where('email', $userpaspor->email)->first();
 
-                $is_pusat = false;
-
-                foreach ($user_scopes as $user_scope) {
-                    UserRole::updateOrCreate([
-                        'user_id' => $id_user,
-                        'role_id' => $user_scope->k_group,
-                    ], [
-                        'user_id' => $id_user,
-                        'role_id' => $user_scope->k_group,
-                    ]);
-
-                    if (in_array((int)$user_scope->k_group, [5, 22, 27, 28, 37, 42])) {
-                        $is_pusat = true;
+                if (!$user->hasRole('admin')) {
+                    if (count($user_scopes) == 0) {
+                        abort(401, 'Mohon maaf anda tidak memiliki hak akses');
                     }
-                }
 
-                if ($is_pusat == true) {
-                    UserRole::updateOrCreate([
-                        'user_id' => $id_user,
-                        'role_id' => 99,
-                    ], [
-                        'user_id' => $id_user,
-                        'role_id' => 99,
-                    ]);
+                    $is_pusat = false;
+
+                    foreach ($user_scopes as $user_scope) {
+                        UserRole::updateOrCreate([
+                            'user_id' => $id_user,
+                            'role_id' => $user_scope->k_group,
+                        ], [
+                            'user_id' => $id_user,
+                            'role_id' => $user_scope->k_group,
+                        ]);
+
+                        if (in_array((int)$user_scope->k_group, [5, 22, 27, 28, 37, 42])) {
+                            $is_pusat = true;
+                        }
+                    }
+
+                    if ($is_pusat == true) {
+                        UserRole::updateOrCreate([
+                            'user_id' => $id_user,
+                            'role_id' => 99,
+                        ], [
+                            'user_id' => $id_user,
+                            'role_id' => 99,
+                        ]);
+                    }
                 }
 
                 Auth::login($user, false);

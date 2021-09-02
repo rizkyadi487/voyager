@@ -141,13 +141,28 @@ class Menu extends Model
                 $item->href = config('app.endpoin_url') . $item->href;
             }
 
-            if (Auth::user()->can('browse', $item)  || Auth::user()->hasPermission($item->route) || Auth::user()->hasRole('admin')) {
-                $item->allow = true;
-            } else {
-                if($item->route == null && $item->children->count() > 0){
+            if(substr( $item->route, 0, strlen("voyager") ) === "voyager" && substr( $item->route, strlen("index")*-1, strlen("index") ) === "index"){
+                if (Auth::user()->can('browse', $item) || Auth::user()->hasRole('admin')) {
                     $item->allow = true;
+                } else {
+                    if($item->route == null && $item->children->count() > 0){
+                        $item->allow = true;
+                    }
+                }
+            }else{
+                if (Auth::user()->hasPermission($item->route) || Auth::user()->hasRole('admin')) {
+                    $item->allow = true;
+                } else {
+                    if($item->route == null && $item->children->count() > 0){
+                        foreach ($item->children as $index => $child) {
+                            if($child->allow==true){
+                                $item->allow = true;
+                            }
+                        }
+                    }
                 }
             }
+
             return $item;
         });
 
@@ -165,7 +180,7 @@ class Menu extends Model
             $items = $items->filter(function ($item) {
                 return !$item->children->isEmpty()
                     || (Auth::user()->can('browse', $item)
-                        && Auth::user()->hasPermission($item->route));
+                    || Auth::user()->hasPermission($item->route));
             })->filter(function ($item) {
                 // Filter out empty menu-items
                 if ($item->url == '' && $item->route == '' && $item->children->count() == 0) {
@@ -174,9 +189,6 @@ class Menu extends Model
                 return true;
             });
         }
-
-//         if (Auth::user()->hasRole('op_kota'))
-//             \Log::info($items->values());
 
         return $items->values();
     }
